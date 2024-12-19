@@ -1,0 +1,26 @@
+[
+    {
+        "predicate": "All",
+        "conditions": [
+            {
+                "field": "From",
+                "predicate": "Contains",
+                "value": "testrajalakshmi@gmail.com"
+            },
+            {
+                "field": "Subject",
+                "predicate": "Contains",
+                "value": "test"
+            },
+            {
+                "field": "Received",
+                "predicate": "Greater than",
+                "value": 2
+            }
+        ],
+        "actions": {
+            "mark_as": "read",
+            "move_message": "INBOX"
+        }
+    }
+]
