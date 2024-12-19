@@ -5,7 +5,6 @@ import time
 from config import FIELD_VALUE_MAPPINGS, PREDICATE_MAPPINGS, ACTION_LABEL_MAPPINGS
 from gmail_oauth import authenticate_gmail, modify_email
 from connection import DatabaseService
-import pdb
 
 def process_email(email, rules, service, db_service):
     try:
@@ -18,6 +17,7 @@ def process_email(email, rules, service, db_service):
         print(f'An error occurred: {error}')
 
 def evaluate_rule(email, rule):
+    #evaluating rule based on a condition. Returning true or false based on ALL or ANY predicate
     for condition in rule['conditions']:
         db_name = FIELD_VALUE_MAPPINGS.get(condition['field'])
         db_value = email.get(db_name)
@@ -30,16 +30,18 @@ def evaluate_rule(email, rule):
     return rule['predicate'] == 'All'
 
 def apply_condition(db_value, predicate, value):
-    operator = PREDICATE_MAPPINGS.get(predicate)
+    operator = PREDICATE_MAPPINGS.get(predicate) #fetches operator from constant mapping in config.py 
     if operator:
         if operator in ["in", "not in", "==", "!="]:
            return eval(f"'{value}' {operator} '{db_value}'")
         if operator == '<':
+            #eg: less than 2 days. Checks for emails created before 2 days
             field_date = datetime.strptime(db_value, "%a, %d %b %Y %H:%M:%S %z")
             current_time = int(time.time() * 1000)
             previous = current_time - ((int(value)*24) * 60 * 60 * 1000)
             return field_date.timestamp()*1000 < previous
         if operator == '>':
+            #eg: greater than 2 days. Checks for emails created in last 2 days
             field_date = datetime.strptime(db_value, "%a, %d %b %Y %H:%M:%S %z")
             current_time = int(time.time() * 1000)
             modified_time = current_time - ((int(value)*24) * 60 * 60 * 1000)
@@ -50,9 +52,9 @@ def apply_actions(actions, message_id, service, db_service):
     try:        
         for action_key, action_value in actions.items():
             if action_key == "mark_as":
-              label = ACTION_LABEL_MAPPINGS.get(action_value)
+              label = ACTION_LABEL_MAPPINGS.get(action_value) # get remove or add labels from constant mapping
               message = modify_email(service, 'me', message_id, {label: ['UNREAD']})
-              db_service.update_record(message_id, message['labelIds'])
+              db_service.update_record(message_id, message['labelIds']) #update the labels in db
               print(f"Action {action_value} applied to message {message_id}")
             elif action_key == "move_message":
               message = modify_email(service, 'me', message_id, {'addLabelIds': [action_value]})

@@ -9,10 +9,10 @@ from typing import List
 from connection import DatabaseService
 from config import EMAIL_LABELS
 
-SCOPES = ['https://www.googleapis.com/auth/gmail.modify', 
-          'https://www.googleapis.com/auth/gmail.labels']
+SCOPES = ['https://www.googleapis.com/auth/gmail.modify', 'https://www.googleapis.com/auth/gmail.labels']
 
 def authenticate_gmail():
+    #authenticates gmail account and avoid authentication when valid creds are available
     creds = None
     if os.path.exists('token.json'):
         with open('token.json', 'r') as token_file:
@@ -33,6 +33,7 @@ def authenticate_gmail():
     return build('gmail', 'v1', credentials=creds)
 
 def fetch_emails(service):
+    #fetch emails from gmail service
     all_messages = {}
     for label in EMAIL_LABELS:
         results = service.users().messages().list(userId='me', labelIds=[label], maxResults=10).execute()
@@ -83,6 +84,7 @@ def extract_email_data(msg):
     }
 
 def create_or_update_email_in_db(emails, db_service):
+    #create or update the record in db.
     existing_emails = {email['message_id']: email['labels'] for email in DatabaseService().get_all_emails_from_db()}
     for email in emails:
         existing_status = existing_emails.get(email['message_id'])
