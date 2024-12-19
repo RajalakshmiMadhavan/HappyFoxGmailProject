@@ -1,11 +1,6 @@
 import unittest
-from unittest.mock import patch, Mock, MagicMock
-import sqlite3
-import os
+from unittest.mock import patch, Mock
 import json
-from gmail_oauth import (
-    authenticate_gmail, fetch_emails, extract_email_data, modify_email
-)
 from process_emails_with_rules import evaluate_rule
 from connection import DatabaseService
 

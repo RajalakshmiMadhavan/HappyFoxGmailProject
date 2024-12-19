@@ -1,10 +1,10 @@
-import json
-from datetime import datetime
-from googleapiclient.errors import HttpError
-import time
 from config import FIELD_VALUE_MAPPINGS, PREDICATE_MAPPINGS, ACTION_LABEL_MAPPINGS
 from gmail_oauth import authenticate_gmail, modify_email
+from googleapiclient.errors import HttpError
+from datetime import datetime
 from connection import DatabaseService
+import json
+import time
 
 def process_email(email, rules, service, db_service):
     try:
